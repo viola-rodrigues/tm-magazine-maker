@@ -29,7 +29,13 @@ button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
 .page h3{font-size:26px;margin:0 0 4px;color:var(--mag,#1f4e8c);border-bottom:3px solid var(--mag,#1f4e8c);padding-bottom:6px}
 .page .sub{font:13px system-ui;color:#666;margin-bottom:12px}
 .page p{white-space:pre-wrap;font-size:14px;line-height:1.55}
-.cover{justify-content:center;text-align:center}
+.cover{justify-content:center;text-align:center;position:relative;padding-top:52mm}
+.cover::before,.cover::after{content:"";position:absolute;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.bt{position:absolute;left:6.1mm;top:19.4mm;width:197.8mm;height:26.3mm;box-sizing:border-box;padding:0 8mm 0 44mm;overflow:hidden;display:flex;flex-direction:column;justify-content:center;align-items:flex-end;text-align:right;color:#fff;z-index:1}
+.bt b{font:700 30px/1.15 Georgia,serif}
+.bt span{font:15px/1.3 system-ui,sans-serif;margin-top:4px}
+.cover::before{left:6.1mm;top:6.2mm;width:197.8mm;height:39.5mm;background:linear-gradient(90deg,#0095ad 0,#003f63 45%,#003f63 100%) top/100% 33.5% no-repeat,linear-gradient(90deg,#45b3cb 0,#1e5a7f 45%,#1e5b7f 100%) bottom/100% 66.5% no-repeat}
+.cover::after{left:12.2mm;top:13.1mm;width:34.4mm;height:28.5mm;background:url(ToastmastersLogo3Color.png) center/contain no-repeat}
 .cover h1{font-size:44px;color:var(--mag,#1f4e8c);margin:0}
 .cover .club{font:600 16px system-ui;letter-spacing:.2em;text-transform:uppercase;color:#666;margin-bottom:18px}
 .grid{display:grid;grid-template-columns:repeat(var(--cols,3),1fr);gap:14px}
@@ -184,7 +190,7 @@ function pv(){
  const themeHTML=textSec('Theme',m.themeTitle,m.theme),wodHTML=textSec('Word of the Day',m.wodWord,m.wod);
  const thanksHTML=(S.thanks.text||S.thanks.photo)?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left">Special Thanks</h4>${S.thanks.text?`<p style="text-align:left;margin:0 0 8px">${esc(S.thanks.text)}</p>`:''}${S.thanks.photo?`<div class="zf" style="width:40%;aspect-ratio:3/4;margin:12px auto 0;border-radius:30px;background:#eee">${zimg(S.thanks,3/4)}</div>`:''}`:'';
  const endHTML=(m.outro||S.team.photo)?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left">Concluding Note</h4>${m.outro?`<p style="text-align:left;margin:0 0 8px">${esc(m.outro)}</p>`:''}${S.team.photo?`<div class="zf" style="width:60%;aspect-ratio:16/9;margin:12px auto 0;border-radius:6px;background:#eee">${zimg(S.team,16/9)}</div>`:''}`:'';
- let n=1,o=`<div class="page cover" style="--mag:${m.color}"><div class="club">${esc(m.club)}</div><h1>${esc(m.title)}</h1><div class="sub" style="margin-top:12px">${esc(m.issue)} ${d?'· '+esc(d):''}</div><p style="text-align:left;margin-top:40px">${esc(m.intro)}</p>${groupHTML}${themeHTML}${wodHTML}${rolesHTML}${speechHTML}${topicsHTML}${winnersHTML}${thanksHTML}${endHTML}${foot(n++)}</div>`;
+ let n=1,o=`<div class="page cover" style="--mag:${m.color}"><div class="bt"><b>${esc(m.title)}</b>${m.issue?`<span>${esc(m.issue)}</span>`:''}${d?`<span>${esc(d)}</span>`:''}</div><div class="club">${esc(m.club)}</div><p style="text-align:left;margin-top:40px">${esc(m.intro)}</p>${groupHTML}${themeHTML}${wodHTML}${rolesHTML}${speechHTML}${topicsHTML}${winnersHTML}${thanksHTML}${endHTML}${foot(n++)}</div>`;
  $('#pages').innerHTML=o;
  // flow an overflowing cover onto continuation pages
  const lim=297*96/25.4;let pg=$('#pages .cover');
