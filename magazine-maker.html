@@ -1,0 +1,190 @@
+﻿<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>Magazine Maker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f4f1ea;--pn:#fff;--tx:#1d1d1f;--mu:#6b6b70;--bd:#dcd8cd;--ac:#1f4e8c}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17171a;--pn:#232327;--tx:#eee;--mu:#9a9aa2;--bd:#3a3a40}}
+:root[data-theme="dark"]{--bg:#17171a;--pn:#232327;--tx:#eee;--mu:#9a9aa2;--bd:#3a3a40}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}
+#app{display:grid;grid-template-columns:400px 1fr;height:100vh}
+#ed{overflow:auto;padding:14px;background:var(--pn);border-right:1px solid var(--bd)}
+#pv{overflow:auto;padding:18px}
+h1{font-size:18px;margin:0 0 4px}h2{font-size:14px;margin:18px 0 6px;display:flex;justify-content:space-between;align-items:center}
+input,textarea,select{width:100%;padding:7px 8px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--tx);font:inherit}
+textarea{min-height:64px;resize:vertical}
+label.f{display:block;font-size:12px;color:var(--mu);margin:8px 0 2px}
+button,.btn{border:1px solid var(--bd);background:var(--pn);color:var(--tx);border-radius:6px;padding:6px 10px;cursor:pointer;font:inherit;font-size:13px}
+button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
+.row{display:grid;grid-template-columns:54px 1fr 24px;gap:6px;align-items:center;margin-bottom:8px;padding:6px;border:1px solid var(--bd);border-radius:8px}
+.row .th{width:54px;height:54px;border-radius:6px;background:var(--bg);border:1px dashed var(--bd);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--mu);cursor:pointer;overflow:hidden;position:relative}
+.row .th img:not(.zi){width:100%;height:100%;object-fit:cover}
+.row .x{padding:0;border:0;background:none;color:var(--mu);font-size:18px}
+.row input+input{margin-top:4px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bar{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.pages{display:flex;flex-direction:column;align-items:center;gap:18px}
+.page{width:210mm;min-height:297mm;background:#fff;color:#222;padding:14mm 14mm 0;display:flex;flex-direction:column;box-shadow:0 2px 12px #0003;font-family:Georgia,serif}
+.page h3{font-size:26px;margin:0 0 4px;color:var(--mag,#1f4e8c);border-bottom:3px solid var(--mag,#1f4e8c);padding-bottom:6px}
+.page .sub{font:13px system-ui;color:#666;margin-bottom:12px}
+.page p{white-space:pre-wrap;font-size:14px;line-height:1.55}
+.cover{justify-content:center;text-align:center}
+.cover h1{font-size:44px;color:var(--mag,#1f4e8c);margin:0}
+.cover .club{font:600 16px system-ui;letter-spacing:.2em;text-transform:uppercase;color:#666;margin-bottom:18px}
+.grid{display:grid;grid-template-columns:repeat(var(--cols,3),1fr);gap:14px}
+.grid.ctr{display:flex;flex-wrap:wrap;justify-content:center}
+.grid.ctr .card{width:calc((100% - (var(--cols,3) - 1)*14px)/var(--cols,3))}
+.card{text-align:center}
+.card .im{width:100%;aspect-ratio:1;background:#eee;overflow:hidden;border-radius:6px;position:relative}
+img.zi{position:absolute;max-width:none;display:block;object-fit:fill}
+.zf{position:relative;overflow:hidden}
+.circle .im{border-radius:50%}.round .im{border-radius:18px}
+.card b{display:block;margin-top:6px;font-size:14px}.card span{font:12px system-ui;color:#666}
+.team img{width:100%;border-radius:6px;display:block}
+.foot{margin-top:auto;border-top:2px solid var(--mag,#1f4e8c);padding:8px 0 10mm;font:11px system-ui;color:#555;display:flex;justify-content:space-between;gap:10px}
+#tabs{display:none}
+@media (max-width:860px){#app{display:block;height:auto}#ed,#pv{height:auto;overflow:visible}#pv{overflow-x:auto}
+#tabs{display:flex;position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--pn);border-bottom:1px solid var(--bd)}#tabs button{flex:1;border:0;border-radius:0;padding:12px}
+body[data-v="e"] #pv{display:none}body[data-v="p"] #ed{display:none}}
+@media print{@page{size:A4;margin:0}:root{padding:0}body{background:#fff}#app{display:block;height:auto}#ed,#tabs{display:none!important}#pv{display:block!important;padding:0;overflow:visible}.pages{gap:0;display:block}.page{box-shadow:none;height:297mm;min-height:0;page-break-after:always;overflow:hidden}}
+</style></head>
+<body data-v="e">
+<div id="tabs"><button onclick="document.body.dataset.v='e'">✏️ Edit</button><button onclick="document.body.dataset.v='p'">👁 Preview</button></div>
+<div id="app">
+<div id="ed"></div>
+<div id="pv"><div class="pages" id="pages"></div></div>
+</div>
+<script>
+const SECS=[{k:'roles',t:'Role takers',l:'Role'},{k:'speeches',t:'Speeches',l:'Speech title'},{k:'evals',t:'Evaluators',l:'Evaluator'},{k:'topics',t:'Table Topics',l:'Question / topic'},{k:'winners',t:'Awards and Recognitions',l:'Award'}];
+const blank=()=>({
+ meta:{title:'Minutes of the Meeting',club:'Toastmasters Club',issue:'Meeting #',date:'',footer:'Toastmasters Club · Minutes of the Meeting',intro:'Write a warm opening note about the meeting theme and highlights…',outro:'Closing thoughts, thanks and next meeting details…',cols:3,shape:'square',color:'#1f4e8c'},
+ roles:['Toastmaster of the Day','Timer','Ah-Counter','Grammarian'].map(l=>({name:'',label:l,photo:''})),
+ speeches:[{name:'',label:'',path:'',photo:''},{name:'',label:'',path:'',photo:''}],
+ evals:[{name:'',label:'',photo:''},{name:'',label:'',photo:''}],
+ topics:[{name:'',label:'',photo:''},{name:'',label:'',photo:''}],
+ winners:['Best Speaker','Best Evaluator','Best Table Topics'].map(l=>({name:'',label:l,photo:''})),
+ team:{photo:'',caption:'Our team'}
+});
+let S;try{S=JSON.parse(localStorage.getItem('mag1'))}catch(e){}
+if(!S||!S.meta)S=blank();
+if(!S.topics)S.topics=blank().topics;
+const $=s=>document.querySelector(s);
+const esc=t=>String(t||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let tm;function save(){clearTimeout(tm);tm=setTimeout(()=>{try{localStorage.setItem('mag1',JSON.stringify(S))}catch(e){}},400)}
+function upd(){save();pv()}
+
+// image: crop to aspect & shrink & compress
+function proc(file,w,h){return new Promise(res=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{
+ const sc=Math.max(w/im.width,h/im.height),sw=w/sc,sh=h/sc,c=document.createElement('canvas');c.width=w;c.height=h;
+ c.getContext('2d').drawImage(im,(im.width-sw)/2,(im.height-sh)/2,sw,sh,0,0,w,h);res(c.toDataURL('image/jpeg',.8))};im.src=r.result};r.readAsDataURL(file)})}
+const pick=cb=>{const i=document.createElement('input');i.type='file';i.accept='image/*';i.multiple=true;i.onchange=()=>cb([...i.files]);i.click()};
+
+function ed(){
+ const m=S.meta;let h=`<h1>📰 Magazine Maker</h1><div style="color:var(--mu);font-size:12px">Photos are compressed on upload. Click a photo to zoom &amp; reposition it.</div>
+ <h2>Issue details</h2>
+ <label class="f">Magazine title</label><input value="${esc(m.title)}" oninput="S.meta.title=this.value;upd()">
+ <div class="two"><div><label class="f">Club name</label><input value="${esc(m.club)}" oninput="S.meta.club=this.value;upd()"></div>
+ <div><label class="f">Issue / meeting no.</label><input value="${esc(m.issue)}" oninput="S.meta.issue=this.value;upd()"></div></div>
+ <div class="two"><div><label class="f">Date</label><input type="date" value="${esc(m.date)}" oninput="S.meta.date=this.value;upd()"></div>
+ <div><label class="f">Accent colour</label><input type="color" value="${m.color}" oninput="S.meta.color=this.value;upd()"></div></div>
+ <div class="two"><div><label class="f">Photos per row</label><select onchange="S.meta.cols=+this.value;upd()">${[2,3,4].map(n=>`<option ${n==m.cols?'selected':''}>${n}</option>`)}</select></div>
+ <div><label class="f">Photo shape</label><select onchange="S.meta.shape=this.value;upd()">${['square','round','circle'].map(n=>`<option ${n==m.shape?'selected':''}>${n}</option>`)}</select></div></div>
+ <label class="f">Opening note (beginning)</label><textarea oninput="S.meta.intro=this.value;upd()">${esc(m.intro)}</textarea>`;
+ SECS.forEach(s=>{const isR=s.k=='roles';h+=`<h2>${s.t}<span><button onclick="add('${s.k}')">＋</button></span></h2>`;
+  if(s.k=='speeches')h+=`<label class="f">Details for Prepared Speeches and Evaluators</label><textarea placeholder="Any details shown under the section heading…" oninput="S.meta.speechNote=this.value;upd()">${esc(m.speechNote)}</textarea>`;
+  if(isR)h+=`<label class="f">No. of photos in a row</label><select onchange="S.meta.rolesCols=+this.value;upd()">${[2,3,4,5,6].map(n=>`<option ${n==(m.rolesCols||m.cols)?'selected':''}>${n}</option>`)}</select>`;
+  if(s.k=='topics')h+=`<label class="f">No. of photos in a row</label><select onchange="S.meta.topicsCols=+this.value;upd()">${[1,2,3,4,5,6].map(n=>`<option ${n==(m.topicsCols||m.cols)?'selected':''}>${n}</option>`)}</select>`;
+  S[s.k].forEach((e,i)=>{h+=`<div class="row"><div class="th" onclick="ph('${s.k}',${i})">${e.photo?zimg(e,1):'📷'}</div>
+  <div><input placeholder="Toastmaster's name" value="${esc(e.name)}" oninput="S.${s.k}[${i}].name=this.value;upd()"><input placeholder="${s.l}" value="${esc(e.label)}" oninput="S.${s.k}[${i}].label=this.value;upd()">${s.k=='speeches'?`<input placeholder="Project / Pathway details" value="${esc(e.path)}" oninput="S.speeches[${i}].path=this.value;upd()">`:''}</div>
+  <button class="x" onclick="del('${s.k}',${i})">×</button></div>`});
+  const addLbl={roles:'role taker',speeches:'speaker',evals:'evaluator',topics:'table topics speaker'}[s.k];
+  if(addLbl)h+=`<button onclick="add('${s.k}')" style="width:100%;margin-top:6px" title="Add another ${addLbl}">＋ Add ${addLbl}</button>`});
+ h+=`<h2>Concluding Note</h2><textarea oninput="S.meta.outro=this.value;upd()">${esc(m.outro)}</textarea>
+ <label class="f">Photo (optional)</label><div class="row"><div class="th" onclick="tp()">${S.team.photo?`<img src="${S.team.photo}" style="width:100%;height:100%;object-fit:cover">`:'📷'}</div>
+ <div style="grid-column:span 2;color:var(--mu);font-size:12px">Shown centred below the note.</div>${S.team.photo?`<button class="x" onclick="S.team.photo='';ed();upd()">×</button>`:''}</div>
+ <label class="f">Footer text (every page)</label><input value="${esc(m.footer)}" oninput="S.meta.footer=this.value;upd()">
+ <div class="bar"><button class="p" onclick="window.print()">🖨 Export PDF / Print</button><button onclick="if(confirm('Clear everything?')){S=blank();ed();upd()}">Reset</button></div>
+ <div style="color:var(--mu);font-size:12px;margin-top:8px">In the print dialog choose “Save as PDF”, A4, margins none. Your draft auto-saves on this device.</div>`;
+ $('#ed').innerHTML=h}
+
+// photos keep the whole image; zoom (z) and pan (x,y in % of frame) are applied at render time
+function procFull(file,max){return new Promise(res=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{
+ const sc=Math.min(1,max/Math.max(im.width,im.height)),w=Math.round(im.width*sc),h=Math.round(im.height*sc),c=document.createElement('canvas');c.width=w;c.height=h;
+ c.getContext('2d').drawImage(im,0,0,w,h);res({photo:c.toDataURL('image/jpeg',.82),w,h})};im.src=r.result};r.readAsDataURL(file)})}
+async function setPhoto(e,file,max){Object.assign(e,await procFull(file,max),{z:1,x:0,y:0})}
+function dims(e,fa){const ia=e.w&&e.h?e.w/e.h:fa;return ia>fa?{W:ia/fa*100,H:100}:{W:100,H:fa/ia*100}}
+function imgTf(e,fa){const{W,H}=dims(e,fa);return `width:${W}%;height:${H}%;left:calc(50% + ${e.x||0}%);top:calc(50% + ${e.y||0}%);transform:translate(-50%,-50%) scale(${e.z||1})`}
+const zimg=(e,fa)=>`<img class="zi" src="${e.photo}" style="${imgTf(e,fa)}">`;
+
+function zoomOpen(e,fa,max){
+ const rad=fa==1?{square:'6px',round:'18px',circle:'50%'}[S.meta.shape]:'6px';
+ const o=document.createElement('div');
+ o.style.cssText='position:fixed;inset:0;background:#0009;z-index:99;display:flex;align-items:center;justify-content:center;padding:12px';
+ o.innerHTML=`<div style="background:var(--pn);color:var(--tx);border-radius:10px;padding:16px;width:min(100%,340px)">
+  <div class="zf" style="width:100%;aspect-ratio:${fa};border-radius:${rad};background:#eee;touch-action:none;cursor:grab"></div>
+  <div style="color:var(--mu);font-size:12px;margin:8px 0">Drag to reposition · slider or mouse wheel to zoom</div>
+  <div style="display:flex;gap:6px;align-items:center"><button class="zm">−</button><input type="range" min="1" max="4" step="0.01" style="padding:0"><button class="zp">＋</button></div>
+  <div class="bar"><button class="rp">Replace photo</button><button class="rs">Reset</button><button class="p dn" style="margin-left:auto">Done</button></div></div>`;
+ const fr=o.querySelector('.zf'),sl=o.querySelector('input');let raf=0;
+ const draw=()=>{const{W,H}=dims(e,fa),z=e.z||1,mx=Math.max(0,(W*z/100-1)*50),my=Math.max(0,(H*z/100-1)*50);
+  e.x=Math.max(-mx,Math.min(mx,e.x||0));e.y=Math.max(-my,Math.min(my,e.y||0));
+  const im=fr.firstChild;if(im&&im.src!==e.photo)im.src=e.photo;
+  if(im)im.style.cssText=imgTf(e,fa);sl.value=z;
+  cancelAnimationFrame(raf);raf=requestAnimationFrame(upd)};
+ const zoom=v=>{e.z=Math.max(1,Math.min(4,+v));draw()};
+ fr.innerHTML=zimg(e,fa);draw();
+ let d=null;
+ fr.onpointerdown=ev=>{d={x:ev.clientX,y:ev.clientY};fr.setPointerCapture(ev.pointerId);fr.style.cursor='grabbing'};
+ fr.onpointermove=ev=>{if(!d)return;e.x=(e.x||0)+(ev.clientX-d.x)/fr.clientWidth*100;e.y=(e.y||0)+(ev.clientY-d.y)/fr.clientHeight*100;d={x:ev.clientX,y:ev.clientY};draw()};
+ fr.onpointerup=fr.onpointercancel=()=>{d=null;fr.style.cursor='grab'};
+ fr.addEventListener('wheel',ev=>{ev.preventDefault();zoom((e.z||1)*(ev.deltaY<0?1.08:1/1.08))},{passive:false});
+ sl.oninput=()=>zoom(sl.value);
+ o.querySelector('.zm').onclick=()=>zoom((e.z||1)-.2);
+ o.querySelector('.zp').onclick=()=>zoom((e.z||1)+.2);
+ o.querySelector('.rs').onclick=()=>{e.z=1;e.x=0;e.y=0;draw()};
+ o.querySelector('.rp').onclick=()=>pick(async f=>{if(!f[0])return;await setPhoto(e,f[0],max);draw()});
+ const close=()=>{o.remove();ed();upd()};
+ o.querySelector('.dn').onclick=close;
+ o.onclick=ev=>{if(ev.target===o)close()};
+ document.body.appendChild(o)}
+function ph(k,i){const e=S[k][i];if(e.photo)return zoomOpen(e,1,720);pick(async f=>{if(!f[0])return;await setPhoto(e,f[0],720);ed();upd();zoomOpen(e,1,720)})}
+function tp(){const e=S.team;if(e.photo)return zoomOpen(e,16/9,1400);pick(async f=>{if(!f[0])return;await setPhoto(e,f[0],1400);ed();upd();zoomOpen(e,16/9,1400)})}
+function add(k){S[k].push({name:'',label:'',path:'',photo:''});ed();upd()}
+function del(k,i){S[k].splice(i,1);ed();upd()}
+
+function pv(){
+ const m=S.meta,d=m.date?new Date(m.date+'T00:00').toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'}):'';
+ const foot=(n)=>`<div class="foot"><span>${esc(m.footer)}</span><span>${esc(d)} · Page ${n}</span></div>`;
+ const roles=S.roles.filter(e=>e.name||e.photo);
+ const rolesHTML=roles.length?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left">Role Takers</h4><div class="grid ctr ${m.shape}" style="--cols:${m.rolesCols||m.cols};text-align:left">${roles.map(e=>`<div class="card"><div class="im">${e.photo?zimg(e,1):''}</div><b>${esc(e.name)}</b><span>${esc(e.label)}</span></div>`).join('')}</div>`:'';
+ const maxLen=Math.max(S.speeches.length,S.evals.length);let pairRows='';
+ for(let i=0;i<maxLen;i++){const sp=S.speeches[i]||{name:'',label:'',photo:''},ev=S.evals[i]||{name:'',label:'',photo:''};if(!(sp.name||sp.photo||sp.label||sp.path||ev.name||ev.photo))continue;
+  const person=e=>`<div class="card"><div class="im ${m.shape}">${e.photo?zimg(e,1):''}</div><b>${esc(e.name)}</b></div>`;
+  pairRows+=`<div style="display:grid;grid-template-columns:161px 1fr 161px;gap:16px;margin:0 40px;align-items:center;padding:10px 0">${person(sp)}<div style="text-align:left"><b>${esc(sp.label)}</b>${sp.path?`<div style="color:#666">${esc(sp.path)}</div>`:''}</div>${person(ev)}</div>`}
+ const speechHTML=(pairRows||m.speechNote)?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left">Prepared Speeches and Evaluators</h4>${m.speechNote?`<p style="text-align:left;margin:0 0 8px">${esc(m.speechNote)}</p>`:''}${pairRows}`:'';
+ const tt=S.topics.filter(e=>e.name||e.photo||e.label);
+ const topicsHTML=tt.length?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left">Table Topics</h4><div class="grid ctr ${m.shape}" style="--cols:${m.topicsCols||m.cols}">${tt.map(e=>`<div class="card"><div class="im">${e.photo?zimg(e,1):''}</div><b>${esc(e.name)}</b><span>${esc(e.label)}</span></div>`).join('')}</div>`:'';
+ const ww=S.winners.filter(e=>e.name||e.photo);
+ const winnersHTML=ww.length?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left">Awards and Recognitions</h4><div class="grid ctr ${m.shape}" style="--cols:${m.cols}">${ww.map(e=>`<div class="card"><div class="im">${e.photo?zimg(e,1):''}</div><b>${esc(e.name)}</b><span>${esc(e.label)}</span></div>`).join('')}</div>`:'';
+ const endHTML=(m.outro||S.team.photo)?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left">Concluding Note</h4>${m.outro?`<p style="text-align:left;margin:0 0 8px">${esc(m.outro)}</p>`:''}${S.team.photo?`<div class="zf" style="width:60%;aspect-ratio:16/9;margin:12px auto 0;border-radius:6px;background:#eee">${zimg(S.team,16/9)}</div>`:''}`:'';
+ let n=1,o=`<div class="page cover" style="--mag:${m.color}"><div class="club">${esc(m.club)}</div><h1>${esc(m.title)}</h1><div class="sub" style="margin-top:12px">${esc(m.issue)} ${d?'· '+esc(d):''}</div><p style="text-align:left;margin-top:40px">${esc(m.intro)}</p>${rolesHTML}${speechHTML}${topicsHTML}${winnersHTML}${endHTML}${foot(n++)}</div>`;
+ $('#pages').innerHTML=o;
+ // flow an overflowing cover onto continuation pages
+ const lim=297*96/25.4;let pg=$('#pages .cover');
+ while(pg&&pg.offsetHeight>lim+1){
+  const ft=pg.querySelector('.foot'),kids=[...pg.children].filter(c=>c!==ft);
+  if(kids.length<5)break;
+  const nx=document.createElement('div');nx.className='page';nx.style.cssText=pg.style.cssText;nx.appendChild(ft.cloneNode(true));
+  pg.after(nx);
+  while(pg.offsetHeight>lim+1){
+   const ks=[...pg.children].filter(c=>c!==ft);if(ks.length<5)break;
+   let el=ks[ks.length-1];nx.insertBefore(el,nx.firstChild);
+   const prev=[...pg.children].filter(c=>c!==ft).pop();if(prev&&prev.tagName=='H4'){nx.insertBefore(prev,nx.firstChild)}
+  }
+  pg=nx;
+ }
+ [...document.querySelectorAll('#pages .page')].forEach((p,i)=>{const s=p.querySelectorAll('.foot span')[1];if(s)s.textContent=`${d} · Page ${i+1}`})}
+ed();pv();
+</script>
+</body></html>
