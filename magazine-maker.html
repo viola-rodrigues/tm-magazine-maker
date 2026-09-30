@@ -64,11 +64,15 @@ const blank=()=>({
  evals:[{name:'',label:'',photo:''},{name:'',label:'',photo:''}],
  topics:[{name:'',label:'',photo:''},{name:'',label:'',photo:''}],
  winners:['Best Speaker','Best Evaluator','Best Table Topics'].map(l=>({name:'',label:l,photo:''})),
- team:{photo:'',caption:'Our team'}
+ team:{photo:'',caption:'Our team'},
+ thanks:{text:'',photo:''},
+ group:{photo:''}
 });
 let S;try{S=JSON.parse(localStorage.getItem('mag1'))}catch(e){}
 if(!S||!S.meta)S=blank();
 if(!S.topics)S.topics=blank().topics;
+if(!S.thanks)S.thanks=blank().thanks;
+if(!S.group)S.group=blank().group;
 const $=s=>document.querySelector(s);
 const esc=t=>String(t||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let tm;function save(){clearTimeout(tm);tm=setTimeout(()=>{try{localStorage.setItem('mag1',JSON.stringify(S))}catch(e){}},400)}
@@ -88,19 +92,25 @@ function ed(){
  <div><label class="f">Issue / meeting no.</label><input value="${esc(m.issue)}" oninput="S.meta.issue=this.value;upd()"></div></div>
  <div class="two"><div><label class="f">Date</label><input type="date" value="${esc(m.date)}" oninput="S.meta.date=this.value;upd()"></div>
  <div><label class="f">Accent colour</label><input type="color" value="${m.color}" oninput="S.meta.color=this.value;upd()"></div></div>
- <div class="two"><div><label class="f">Photos per row</label><select onchange="S.meta.cols=+this.value;upd()">${[2,3,4].map(n=>`<option ${n==m.cols?'selected':''}>${n}</option>`)}</select></div>
- <div><label class="f">Photo shape</label><select onchange="S.meta.shape=this.value;upd()">${['square','round','circle'].map(n=>`<option ${n==m.shape?'selected':''}>${n}</option>`)}</select></div></div>
- <label class="f">Opening note (beginning)</label><textarea oninput="S.meta.intro=this.value;upd()">${esc(m.intro)}</textarea>`;
+ <label class="f">Photo shape</label><select onchange="S.meta.shape=this.value;upd()">${['square','round','circle'].map(n=>`<option ${n==m.shape?'selected':''}>${n}</option>`)}</select>
+ <label class="f">Opening note (beginning)</label><textarea oninput="S.meta.intro=this.value;upd()">${esc(m.intro)}</textarea>
+ <label class="f">Group photo (optional)</label><div class="row"><div class="th" onclick="gp()">${S.group.photo?`<img src="${S.group.photo}" style="width:100%;height:100%;object-fit:cover">`:'📷'}</div>
+ <div style="grid-column:span 2;color:var(--mu);font-size:12px">Shown centred below the opening note.</div>${S.group.photo?`<button class="x" onclick="S.group.photo='';ed();upd()">×</button>`:''}</div>
+ <h2>Theme</h2><input placeholder="Theme" value="${esc(m.themeTitle)}" oninput="S.meta.themeTitle=this.value;upd()"><textarea placeholder="Theme of the meeting…" oninput="S.meta.theme=this.value;upd()">${esc(m.theme)}</textarea>
+ <h2>Word of the Day</h2><input placeholder="Word" value="${esc(m.wodWord)}" oninput="S.meta.wodWord=this.value;upd()"><textarea placeholder="Word of the day, its meaning and an example…" oninput="S.meta.wod=this.value;upd()">${esc(m.wod)}</textarea>`;
  SECS.forEach(s=>{const isR=s.k=='roles';h+=`<h2>${s.t}<span><button onclick="add('${s.k}')">＋</button></span></h2>`;
   if(s.k=='speeches')h+=`<label class="f">Details for Prepared Speeches and Evaluators</label><textarea placeholder="Any details shown under the section heading…" oninput="S.meta.speechNote=this.value;upd()">${esc(m.speechNote)}</textarea>`;
   if(isR)h+=`<label class="f">No. of photos in a row</label><select onchange="S.meta.rolesCols=+this.value;upd()">${[2,3,4,5,6].map(n=>`<option ${n==(m.rolesCols||m.cols)?'selected':''}>${n}</option>`)}</select>`;
   if(s.k=='topics')h+=`<label class="f">No. of photos in a row</label><select onchange="S.meta.topicsCols=+this.value;upd()">${[1,2,3,4,5,6].map(n=>`<option ${n==(m.topicsCols||m.cols)?'selected':''}>${n}</option>`)}</select>`;
   S[s.k].forEach((e,i)=>{h+=`<div class="row"><div class="th" onclick="ph('${s.k}',${i})">${e.photo?zimg(e,1):'📷'}</div>
-  <div><input placeholder="Toastmaster's name" value="${esc(e.name)}" oninput="S.${s.k}[${i}].name=this.value;upd()"><input placeholder="${s.l}" value="${esc(e.label)}" oninput="S.${s.k}[${i}].label=this.value;upd()">${s.k=='speeches'?`<input placeholder="Project / Pathway details" value="${esc(e.path)}" oninput="S.speeches[${i}].path=this.value;upd()">`:''}</div>
+  <div><input placeholder="Toastmaster's name" value="${esc(e.name)}" oninput="S.${s.k}[${i}].name=this.value;upd()">${s.k=='evals'?'':`<input placeholder="${s.l}" value="${esc(e.label)}" oninput="S.${s.k}[${i}].label=this.value;upd()">`}${s.k=='speeches'?`<input placeholder="Project / Pathway details" value="${esc(e.path)}" oninput="S.speeches[${i}].path=this.value;upd()">`:''}</div>
   <button class="x" onclick="del('${s.k}',${i})">×</button></div>`});
   const addLbl={roles:'role taker',speeches:'speaker',evals:'evaluator',topics:'table topics speaker'}[s.k];
   if(addLbl)h+=`<button onclick="add('${s.k}')" style="width:100%;margin-top:6px" title="Add another ${addLbl}">＋ Add ${addLbl}</button>`});
- h+=`<h2>Concluding Note</h2><textarea oninput="S.meta.outro=this.value;upd()">${esc(m.outro)}</textarea>
+ h+=`<h2>Special Thanks</h2><textarea placeholder="Thank the people who made the meeting special…" oninput="S.thanks.text=this.value;upd()">${esc(S.thanks.text)}</textarea>
+ <label class="f">Photo (optional)</label><div class="row"><div class="th" onclick="thp()">${S.thanks.photo?`<img src="${S.thanks.photo}" style="width:100%;height:100%;object-fit:cover">`:'📷'}</div>
+ <div style="grid-column:span 2;color:var(--mu);font-size:12px">Shown centred below the text.</div>${S.thanks.photo?`<button class="x" onclick="S.thanks.photo='';ed();upd()">×</button>`:''}</div>
+ <h2>Concluding Note</h2><textarea oninput="S.meta.outro=this.value;upd()">${esc(m.outro)}</textarea>
  <label class="f">Photo (optional)</label><div class="row"><div class="th" onclick="tp()">${S.team.photo?`<img src="${S.team.photo}" style="width:100%;height:100%;object-fit:cover">`:'📷'}</div>
  <div style="grid-column:span 2;color:var(--mu);font-size:12px">Shown centred below the note.</div>${S.team.photo?`<button class="x" onclick="S.team.photo='';ed();upd()">×</button>`:''}</div>
  <label class="f">Footer text (every page)</label><input value="${esc(m.footer)}" oninput="S.meta.footer=this.value;upd()">
@@ -118,7 +128,7 @@ function imgTf(e,fa){const{W,H}=dims(e,fa);return `width:${W}%;height:${H}%;left
 const zimg=(e,fa)=>`<img class="zi" src="${e.photo}" style="${imgTf(e,fa)}">`;
 
 function zoomOpen(e,fa,max){
- const rad=fa==1?{square:'6px',round:'18px',circle:'50%'}[S.meta.shape]:'6px';
+ const rad=fa==1?{square:'6px',round:'18px',circle:'50%'}[S.meta.shape]:e===S.group||e===S.thanks?'30px':'6px';
  const o=document.createElement('div');
  o.style.cssText='position:fixed;inset:0;background:#0009;z-index:99;display:flex;align-items:center;justify-content:center;padding:12px';
  o.innerHTML=`<div style="background:var(--pn);color:var(--tx);border-radius:10px;padding:16px;width:min(100%,340px)">
@@ -150,6 +160,8 @@ function zoomOpen(e,fa,max){
  document.body.appendChild(o)}
 function ph(k,i){const e=S[k][i];if(e.photo)return zoomOpen(e,1,720);pick(async f=>{if(!f[0])return;await setPhoto(e,f[0],720);ed();upd();zoomOpen(e,1,720)})}
 function tp(){const e=S.team;if(e.photo)return zoomOpen(e,16/9,1400);pick(async f=>{if(!f[0])return;await setPhoto(e,f[0],1400);ed();upd();zoomOpen(e,16/9,1400)})}
+function gp(){const e=S.group;if(e.photo)return zoomOpen(e,16/9,1400);pick(async f=>{if(!f[0])return;await setPhoto(e,f[0],1400);ed();upd();zoomOpen(e,16/9,1400)})}
+function thp(){const e=S.thanks;if(e.photo)return zoomOpen(e,3/4,1400);pick(async f=>{if(!f[0])return;await setPhoto(e,f[0],1400);ed();upd();zoomOpen(e,3/4,1400)})}
 function add(k){S[k].push({name:'',label:'',path:'',photo:''});ed();upd()}
 function del(k,i){S[k].splice(i,1);ed();upd()}
 
@@ -167,8 +179,12 @@ function pv(){
  const topicsHTML=tt.length?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left">Table Topics</h4><div class="grid ctr ${m.shape}" style="--cols:${m.topicsCols||m.cols}">${tt.map(e=>`<div class="card"><div class="im">${e.photo?zimg(e,1):''}</div><b>${esc(e.name)}</b><span>${esc(e.label)}</span></div>`).join('')}</div>`:'';
  const ww=S.winners.filter(e=>e.name||e.photo);
  const winnersHTML=ww.length?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left">Awards and Recognitions</h4><div class="grid ctr ${m.shape}" style="--cols:${m.cols}">${ww.map(e=>`<div class="card"><div class="im">${e.photo?zimg(e,1):''}</div><b>${esc(e.name)}</b><span>${esc(e.label)}</span></div>`).join('')}</div>`:'';
+ const groupHTML=S.group.photo?`<div class="zf" style="width:100%;aspect-ratio:16/9;margin:12px auto 0;border-radius:40px;background:#eee">${zimg(S.group,16/9)}</div>`:'';
+ const textSec=(t,h,x)=>(h||x)?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left;color:var(--mag)">${t}</h4><div style="text-align:left;margin:0 0 8px;padding-left:10px;border-left:4px solid var(--mag)">${h?`<b style="font-size:18px;display:block;margin-bottom:4px">${esc(h)}</b>`:''}${x?`<p style="margin:0">${esc(x)}</p>`:''}</div>`:'';
+ const themeHTML=textSec('Theme',m.themeTitle,m.theme),wodHTML=textSec('Word of the Day',m.wodWord,m.wod);
+ const thanksHTML=(S.thanks.text||S.thanks.photo)?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left">Special Thanks</h4>${S.thanks.text?`<p style="text-align:left;margin:0 0 8px">${esc(S.thanks.text)}</p>`:''}${S.thanks.photo?`<div class="zf" style="width:40%;aspect-ratio:3/4;margin:12px auto 0;border-radius:30px;background:#eee">${zimg(S.thanks,3/4)}</div>`:''}`:'';
  const endHTML=(m.outro||S.team.photo)?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left">Concluding Note</h4>${m.outro?`<p style="text-align:left;margin:0 0 8px">${esc(m.outro)}</p>`:''}${S.team.photo?`<div class="zf" style="width:60%;aspect-ratio:16/9;margin:12px auto 0;border-radius:6px;background:#eee">${zimg(S.team,16/9)}</div>`:''}`:'';
- let n=1,o=`<div class="page cover" style="--mag:${m.color}"><div class="club">${esc(m.club)}</div><h1>${esc(m.title)}</h1><div class="sub" style="margin-top:12px">${esc(m.issue)} ${d?'· '+esc(d):''}</div><p style="text-align:left;margin-top:40px">${esc(m.intro)}</p>${rolesHTML}${speechHTML}${topicsHTML}${winnersHTML}${endHTML}${foot(n++)}</div>`;
+ let n=1,o=`<div class="page cover" style="--mag:${m.color}"><div class="club">${esc(m.club)}</div><h1>${esc(m.title)}</h1><div class="sub" style="margin-top:12px">${esc(m.issue)} ${d?'· '+esc(d):''}</div><p style="text-align:left;margin-top:40px">${esc(m.intro)}</p>${groupHTML}${themeHTML}${wodHTML}${rolesHTML}${speechHTML}${topicsHTML}${winnersHTML}${thanksHTML}${endHTML}${foot(n++)}</div>`;
  $('#pages').innerHTML=o;
  // flow an overflowing cover onto continuation pages
  const lim=297*96/25.4;let pg=$('#pages .cover');
