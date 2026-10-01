@@ -94,7 +94,7 @@ function ed(){
  const m=S.meta;let h=`<h1>📰 Magazine Maker</h1><div style="color:var(--mu);font-size:12px">Photos are compressed on upload. Click a photo to zoom &amp; reposition it.</div>
  <h2>Issue details</h2>
  <label class="f">Magazine title</label><input value="${esc(m.title)}" oninput="S.meta.title=this.value;upd()">
- <div class="two"><div><label class="f">Club name</label><input value="${esc(m.club)}" oninput="S.meta.club=this.value;upd()"></div>
+ <div class="two"><div><label class="f">Issue heading</label><input value="${esc(m.club)}" oninput="S.meta.club=this.value;upd()"></div>
  <div><label class="f">Issue / meeting no.</label><input value="${esc(m.issue)}" oninput="S.meta.issue=this.value;upd()"></div></div>
  <div class="two"><div><label class="f">Date</label><input type="date" value="${esc(m.date)}" oninput="S.meta.date=this.value;upd()"></div>
  <div><label class="f">Accent colour</label><input type="color" value="${m.color}" oninput="S.meta.color=this.value;upd()"></div></div>
@@ -173,7 +173,7 @@ function del(k,i){S[k].splice(i,1);ed();upd()}
 
 function pv(){
  const m=S.meta,d=m.date?new Date(m.date+'T00:00').toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'}):'';
- const foot=(n)=>`<div class="foot"><span>${esc(m.footer)}</span><span>${esc(d)} · Page ${n}</span></div>`;
+ const foot=(n)=>`<div class="foot"><span>${esc(m.footer)}</span><span>${esc(d)}</span></div>`;
  const roles=S.roles.filter(e=>e.name||e.photo);
  const rolesHTML=roles.length?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left">Role Takers</h4><div class="grid ctr ${m.shape}" style="--cols:${m.rolesCols||m.cols};text-align:left">${roles.map(e=>`<div class="card"><div class="im">${e.photo?zimg(e,1):''}</div><b>${esc(e.name)}</b><span>${esc(e.label)}</span></div>`).join('')}</div>`:'';
  const maxLen=Math.max(S.speeches.length,S.evals.length);let pairRows='';
@@ -205,8 +205,7 @@ function pv(){
    const prev=[...pg.children].filter(c=>c!==ft).pop();if(prev&&prev.tagName=='H4'){nx.insertBefore(prev,nx.firstChild)}
   }
   pg=nx;
- }
- [...document.querySelectorAll('#pages .page')].forEach((p,i)=>{const s=p.querySelectorAll('.foot span')[1];if(s)s.textContent=`${d} · Page ${i+1}`})}
+ }}
 ed();pv();
 </script>
 </body></html>
