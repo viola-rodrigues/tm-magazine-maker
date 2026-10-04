@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><title>Magazine Maker</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style>
@@ -40,6 +40,7 @@ button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
 .cover .club{font:600 16px system-ui;letter-spacing:.2em;text-transform:uppercase;color:#666;margin-bottom:18px}
 .grid{display:grid;grid-template-columns:repeat(var(--cols,3),1fr);gap:14px}
 .grid.ctr{display:flex;flex-wrap:wrap;justify-content:center}
+.grid.ctr{width:calc(100%*var(--cols,3)/var(--wc,3) + 14px*((var(--cols,3) - 1) - var(--cols,3)*(var(--wc,3) - 1)/var(--wc,3)));margin-left:auto;margin-right:auto}
 .grid.ctr .card{width:calc((100% - (var(--cols,3) - 1)*14px)/var(--cols,3))}
 .card{text-align:center}
 .card .im{width:100%;aspect-ratio:1;background:#eee;overflow:hidden;border-radius:6px;position:relative}
@@ -175,21 +176,21 @@ function pv(){
  const m=S.meta,d=m.date?new Date(m.date+'T00:00').toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'}):'';
  const foot=(n)=>`<div class="foot"><span>${esc(m.footer)}</span><span>${esc(d)}</span></div>`;
  const roles=S.roles.filter(e=>e.name||e.photo);
- const rolesHTML=roles.length?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left">Role Takers</h4><div class="grid ctr ${m.shape}" style="--cols:${m.rolesCols||m.cols};text-align:left">${roles.map(e=>`<div class="card"><div class="im">${e.photo?zimg(e,1):''}</div><b>${esc(e.name)}</b><span>${esc(e.label)}</span></div>`).join('')}</div>`:'';
+ const rolesHTML=roles.length?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left">Role Takers</h4><div class="grid ctr ${m.shape}" style="--cols:${m.rolesCols||m.cols};--wc:${Math.max(3,m.rolesCols||m.cols)};text-align:left">${roles.map(e=>`<div class="card"><div class="im">${e.photo?zimg(e,1):''}</div><b>${esc(e.name)}</b><span>${esc(e.label)}</span></div>`).join('')}</div>`:'';
  const maxLen=Math.max(S.speeches.length,S.evals.length);let pairRows='';
  for(let i=0;i<maxLen;i++){const sp=S.speeches[i]||{name:'',label:'',photo:''},ev=S.evals[i]||{name:'',label:'',photo:''};if(!(sp.name||sp.photo||sp.label||sp.path||ev.name||ev.photo))continue;
   const person=e=>`<div class="card"><div class="im ${m.shape}">${e.photo?zimg(e,1):''}</div><b>${esc(e.name)}</b></div>`;
   pairRows+=`<div style="display:grid;grid-template-columns:161px 1fr 161px;gap:16px;margin:0 40px;align-items:center;padding:10px 0">${person(sp)}<div style="text-align:left"><b>${esc(sp.label)}</b>${sp.path?`<div style="color:#666">${esc(sp.path)}</div>`:''}</div>${person(ev)}</div>`}
  const speechHTML=(pairRows||m.speechNote)?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left">Prepared Speeches and Evaluators</h4>${m.speechNote?`<p style="text-align:left;margin:0 0 8px">${esc(m.speechNote)}</p>`:''}${pairRows}`:'';
  const tt=S.topics.filter(e=>e.name||e.photo||e.label);
- const topicsHTML=tt.length?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left">Table Topics</h4><div class="grid ctr ${m.shape}" style="--cols:${m.topicsCols||m.cols}">${tt.map(e=>`<div class="card"><div class="im">${e.photo?zimg(e,1):''}</div><b>${esc(e.name)}</b><span>${esc(e.label)}</span></div>`).join('')}</div>`:'';
+ const topicsHTML=tt.length?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left">Table Topics</h4><div class="grid ctr ${m.shape}" style="--cols:${m.topicsCols||m.cols};--wc:${Math.max(3,m.topicsCols||m.cols)}">${tt.map(e=>`<div class="card"><div class="im">${e.photo?zimg(e,1):''}</div><b>${esc(e.name)}</b><span>${esc(e.label)}</span></div>`).join('')}</div>`:'';
  const ww=S.winners.filter(e=>e.name||e.photo);
- const winnersHTML=ww.length?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left">Awards and Recognitions</h4><div class="grid ctr ${m.shape}" style="--cols:${m.cols}">${ww.map(e=>`<div class="card"><div class="im">${e.photo?zimg(e,1):''}</div><b>${esc(e.name)}</b><span>${esc(e.label)}</span></div>`).join('')}</div>`:'';
+ const winnersHTML=ww.length?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left">Awards and Recognitions</h4><div class="grid ctr ${m.shape}" style="--cols:${m.cols};--wc:${Math.max(3,m.cols)}">${ww.map(e=>`<div class="card"><div class="im">${e.photo?zimg(e,1):''}</div><b>${esc(e.name)}</b><span>${esc(e.label)}</span></div>`).join('')}</div>`:'';
  const groupHTML=S.group.photo?`<div class="zf" style="width:100%;aspect-ratio:16/9;margin:12px auto 0;border-radius:40px;background:#eee">${zimg(S.group,16/9)}</div>`:'';
  const textSec=(t,h,x)=>(h||x)?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left;color:var(--mag)">${t}</h4><div style="text-align:left;margin:0 0 8px;padding-left:10px;border-left:4px solid var(--mag)">${h?`<b style="font-size:18px;display:block;margin-bottom:4px">${esc(h)}</b>`:''}${x?`<p style="margin:0">${esc(x)}</p>`:''}</div>`:'';
  const themeHTML=textSec('Theme',m.themeTitle,m.theme),wodHTML=textSec('Word of the Day',m.wodWord,m.wod);
- const thanksHTML=(S.thanks.text||S.thanks.photo)?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left">Special Thanks</h4>${S.thanks.text?`<p style="text-align:left;margin:0 0 8px">${esc(S.thanks.text)}</p>`:''}${S.thanks.photo?`<div class="zf" style="width:40%;aspect-ratio:3/4;margin:12px auto 0;border-radius:30px;background:#eee">${zimg(S.thanks,3/4)}</div>`:''}`:'';
- const endHTML=(m.outro||S.team.photo)?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left">Concluding Note</h4>${m.outro?`<p style="text-align:left;margin:0 0 8px">${esc(m.outro)}</p>`:''}${S.team.photo?`<div class="zf" style="width:60%;aspect-ratio:16/9;margin:12px auto 0;border-radius:6px;background:#eee">${zimg(S.team,16/9)}</div>`:''}`:'';
+ const thanksHTML=(S.thanks.text||S.thanks.photo)?`<div style="break-inside:avoid"><h4 style="font-size:24px;margin:24px 0 6px;text-align:left">Special Thanks</h4><div style="display:flex;gap:20px;align-items:flex-start"><div style="flex:1;text-align:left">${S.thanks.text?`<p style="margin:0 0 8px">${esc(S.thanks.text)}</p>`:''}</div>${S.thanks.photo?`<div class="zf" style="flex:0 0 36%;aspect-ratio:3/4;margin-right:20px;border-radius:30px;background:#eee">${zimg(S.thanks,3/4)}</div>`:''}</div></div>`:'';
+ const endHTML=(m.outro||S.team.photo)?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left">Concluding Note</h4>${m.outro?`<p style="text-align:left;margin:0 0 8px">${esc(m.outro)}</p>`:''}${S.team.photo?`<div class="zf" style="width:80%;aspect-ratio:1/1;margin:12px auto 0;border-radius:6px;background:#eee">${zimg(S.team,1)}</div>`:''}`:'';
  let n=1,o=`<div class="page cover" style="--mag:${m.color}"><div class="bt"><b>${esc(m.title)}</b>${m.issue?`<span>${esc(m.issue)}</span>`:''}${d?`<span>${esc(d)}</span>`:''}</div><div class="club">${esc(m.club)}</div><p style="text-align:left;margin-top:40px">${esc(m.intro)}</p>${groupHTML}${themeHTML}${wodHTML}${rolesHTML}${speechHTML}${topicsHTML}${winnersHTML}${thanksHTML}${endHTML}${foot(n++)}</div>`;
  $('#pages').innerHTML=o;
  // flow an overflowing cover onto continuation pages
