@@ -65,7 +65,7 @@ body[data-v="e"] #pv{display:none}body[data-v="p"] #ed{display:none}}
 <script>
 const SECS=[{k:'roles',t:'Role takers',l:'Role'},{k:'speeches',t:'Speeches',l:'Speech title'},{k:'evals',t:'Evaluators',l:'Evaluator'},{k:'topics',t:'Table Topics',l:'Question / topic'},{k:'winners',t:'Awards and Recognitions',l:'Award'}];
 const blank=()=>({
- meta:{title:'Minutes of the Meeting',club:'Toastmasters Club',issue:'Meeting #',date:'',footer:'Toastmasters Club · Minutes of the Meeting',intro:'Write a warm opening note about the meeting theme and highlights…',outro:'Closing thoughts, thanks and next meeting details…',cols:3,shape:'square',color:'#1f4e8c'},
+ meta:{title:'Minutes of the Meeting',club:'Toastmasters Club',issue:'Meeting #',date:'',footer:'Toastmasters Club · Minutes of the Meeting',intro:'Write a warm opening note about the meeting theme and highlights…',outro:'Closing thoughts, thanks and next meeting details…',report:'',cols:3,shape:'square',color:'#1f4e8c'},
  roles:['Toastmaster of the Day','Timer','Ah-Counter','Grammarian'].map(l=>({name:'',label:l,photo:''})),
  speeches:[{name:'',label:'',path:'',photo:''},{name:'',label:'',path:'',photo:''}],
  evals:[{name:'',label:'',photo:''},{name:'',label:'',photo:''}],
@@ -120,6 +120,7 @@ function ed(){
  <h2>Concluding Note</h2><textarea oninput="S.meta.outro=this.value;upd()">${esc(m.outro)}</textarea>
  <label class="f">Photo (optional)</label><div class="row"><div class="th" onclick="tp()">${S.team.photo?`<img src="${S.team.photo}" style="width:100%;height:100%;object-fit:cover">`:'📷'}</div>
  <div style="grid-column:span 2;color:var(--mu);font-size:12px">Shown centred below the note.</div>${S.team.photo?`<button class="x" onclick="S.team.photo='';ed();upd()">×</button>`:''}</div>
+ <h2>Report Submitted By</h2><textarea placeholder="Name, role, club / date of submission…" oninput="S.meta.report=this.value;upd()">${esc(m.report||'')}</textarea>
  <label class="f">Footer text (every page)</label><input value="${esc(m.footer)}" oninput="S.meta.footer=this.value;upd()">
  <div class="bar"><button class="p" onclick="window.print()">🖨 Export PDF / Print</button><button onclick="if(confirm('Clear everything?')){S=blank();ed();upd()}">Reset</button></div>
  <div style="color:var(--mu);font-size:12px;margin-top:8px">In the print dialog choose “Save as PDF”, A4, margins none. Your draft auto-saves on this device.</div>`;
@@ -190,7 +191,7 @@ function pv(){
  const textSec=(t,h,x)=>(h||x)?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left;color:var(--mag)">${t}</h4><div style="text-align:left;margin:0 0 8px;padding-left:10px;border-left:4px solid var(--mag)">${h?`<b style="font-size:18px;display:block;margin-bottom:4px">${esc(h)}</b>`:''}${x?`<p style="margin:0">${esc(x)}</p>`:''}</div>`:'';
  const themeHTML=textSec('Theme',m.themeTitle,m.theme),wodHTML=textSec('Word of the Day',m.wodWord,m.wod);
  const thanksHTML=(S.thanks.text||S.thanks.photo)?`<div style="break-inside:avoid"><h4 style="font-size:24px;margin:24px 0 6px;text-align:left">Special Thanks</h4><div style="display:flex;gap:20px;align-items:flex-start"><div style="flex:1;text-align:left">${S.thanks.text?`<p style="margin:0 0 8px">${esc(S.thanks.text)}</p>`:''}</div>${S.thanks.photo?`<div class="zf" style="flex:0 0 36%;aspect-ratio:3/4;margin-right:20px;border-radius:30px;background:#eee">${zimg(S.thanks,3/4)}</div>`:''}</div></div>`:'';
- const endHTML=(m.outro||S.team.photo)?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left">Concluding Note</h4>${m.outro?`<p style="text-align:left;margin:0 0 8px">${esc(m.outro)}</p>`:''}${S.team.photo?`<div class="zf" style="width:80%;aspect-ratio:1/1;margin:12px auto 0;border-radius:6px">${zimg(S.team,1)}</div>`:''}`:'';
+ const endHTML=((m.outro||S.team.photo)?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left">Concluding Note</h4>${m.outro?`<p style="text-align:left;margin:0 0 8px">${esc(m.outro)}</p>`:''}${S.team.photo?`<div class="zf" style="width:80%;aspect-ratio:1/1;margin:12px auto 0;border-radius:6px">${zimg(S.team,1)}</div>`:''}`:'')+(m.report?`<h4 style="font-size:inherit;margin:24px 0 6px;text-align:left">Report Submitted By</h4><p style="text-align:left;margin:0 0 8px;white-space:pre-line">${esc(m.report)}</p>`:'');
  let n=1,o=`<div class="page cover" style="--mag:${m.color}"><div class="bt"><b>${esc(m.title)}</b>${m.issue?`<span>${esc(m.issue)}</span>`:''}${d?`<span>${esc(d)}</span>`:''}</div><div class="club">${esc(m.club)}</div><p style="text-align:left;margin-top:40px">${esc(m.intro)}</p>${groupHTML}${themeHTML}${wodHTML}${rolesHTML}${speechHTML}${topicsHTML}${winnersHTML}${thanksHTML}${endHTML}${foot(n++)}</div>`;
  $('#pages').innerHTML=o;
  // flow an overflowing cover onto continuation pages
