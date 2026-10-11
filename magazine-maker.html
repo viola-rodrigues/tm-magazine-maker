@@ -73,14 +73,14 @@ const blank=()=>({
  topics:[{name:'',label:'',photo:''},{name:'',label:'',photo:''}],
  winners:['Best Speaker','Best Evaluator','Best Table Topics'].map(l=>({name:'',label:l,photo:''})),
  team:{photo:'',caption:'Our team'},
- thanks:{text:'',photo:''},
+ thanks:[{title:'Special Thanks',text:'',photo:''}],
  group:{photo:''}
 });
 let S;try{S=JSON.parse(localStorage.getItem('mag1'))}catch(e){}
 if(!S||!S.meta)S=blank();
 if(!S.topics)S.topics=blank().topics;
 if(!S.challenge)S.challenge=blank().challenge;
-if(!S.thanks)S.thanks=blank().thanks;
+if(!Array.isArray(S.thanks))S.thanks=S.thanks&&(S.thanks.text||S.thanks.photo)?[Object.assign({title:'Special Thanks'},S.thanks)]:blank().thanks;
 if(!S.group)S.group=blank().group;
 const $=s=>document.querySelector(s);
 const esc=t=>String(t||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -116,9 +116,11 @@ function ed(){
   <button class="x" onclick="del('${s.k}',${i})">×</button></div>`});
   const addLbl={roles:'role taker',speeches:'speaker',evals:'evaluator',challenge:'team',topics:'table topics speaker'}[s.k];
   if(addLbl)h+=`<button onclick="add('${s.k}')" style="width:100%;margin-top:6px" title="Add another ${addLbl}">＋ Add ${addLbl}</button>`});
- h+=`<h2>Special Thanks</h2><textarea placeholder="Thank the people who made the meeting special…" oninput="S.thanks.text=this.value;upd()">${esc(S.thanks.text)}</textarea>
- <label class="f">Photo (optional)</label><div class="row"><div class="th" onclick="thp()">${S.thanks.photo?`<img src="${S.thanks.photo}" style="width:100%;height:100%;object-fit:cover">`:'📷'}</div>
- <div style="grid-column:span 2;color:var(--mu);font-size:12px">Shown centred below the text.</div>${S.thanks.photo?`<button class="x" onclick="S.thanks.photo='';ed();upd()">×</button>`:''}</div>
+ S.thanks.forEach((t,i)=>{h+=`<h2>Custom section ${i+1}<span><button onclick="delTh(${i})" title="Remove this section">×</button></span></h2><label class="f">Section heading</label><input placeholder="e.g. Special Thanks" value="${esc(t.title)}" oninput="S.thanks[${i}].title=this.value;upd()">
+ <label class="f">Description</label><textarea placeholder="Write about this section…" oninput="S.thanks[${i}].text=this.value;upd()">${esc(t.text)}</textarea>
+ <label class="f">Photo (optional)</label><div class="row"><div class="th" onclick="thp(${i})">${t.photo?`<img src="${t.photo}" style="width:100%;height:100%;object-fit:cover">`:'📷'}</div>
+ <div style="grid-column:span 2;color:var(--mu);font-size:12px">Shown beside the description.</div>${t.photo?`<button class="x" onclick="S.thanks[${i}].photo='';ed();upd()">×</button>`:''}</div>`});
+ h+=`<button onclick="addTh()" style="width:100%;margin-top:6px">＋ Add section (heading, photo, description)</button>
  <h2>Concluding Note</h2><textarea oninput="S.meta.outro=this.value;upd()">${esc(m.outro)}</textarea>
  <label class="f">Photo (optional)</label><div class="row"><div class="th" onclick="tp()">${S.team.photo?`<img src="${S.team.photo}" style="width:100%;height:100%;object-fit:cover">`:'📷'}</div>
  <div style="grid-column:span 2;color:var(--mu);font-size:12px">Shown centred below the note.</div>${S.team.photo?`<button class="x" onclick="S.team.photo='';ed();upd()">×</button>`:''}</div>
@@ -138,7 +140,7 @@ function imgTf(e,fa){const{W,H}=dims(e,fa);return `width:${W}%;height:${H}%;left
 const zimg=(e,fa)=>`<img class="zi" src="${e.photo}" style="${imgTf(e,fa)}">`;
 
 function zoomOpen(e,fa,max){
- const rad=fa==1?{square:'6px',round:'18px',circle:'50%'}[S.meta.shape]:e===S.group||e===S.thanks?'30px':'6px';
+ const rad=fa==1?{square:'6px',round:'18px',circle:'50%'}[S.meta.shape]:e===S.group||S.thanks.includes(e)?'30px':'6px';
  const o=document.createElement('div');
  o.style.cssText='position:fixed;inset:0;background:#0009;z-index:99;display:flex;align-items:center;justify-content:center;padding:12px';
  o.innerHTML=`<div style="background:var(--pn);color:var(--tx);border-radius:10px;padding:16px;width:min(100%,340px)">
@@ -171,7 +173,9 @@ function zoomOpen(e,fa,max){
 function ph(k,i){const e=S[k][i];if(e.photo)return zoomOpen(e,1,720);pick(async f=>{if(!f[0])return;await setPhoto(e,f[0],720);ed();upd();zoomOpen(e,1,720)})}
 function tp(){const e=S.team;if(e.photo)return zoomOpen(e,16/9,1400);pick(async f=>{if(!f[0])return;await setPhoto(e,f[0],1400);ed();upd();zoomOpen(e,16/9,1400)})}
 function gp(){const e=S.group;if(e.photo)return zoomOpen(e,16/9,1400);pick(async f=>{if(!f[0])return;await setPhoto(e,f[0],1400);ed();upd();zoomOpen(e,16/9,1400)})}
-function thp(){const e=S.thanks;if(e.photo)return zoomOpen(e,3/4,1400);pick(async f=>{if(!f[0])return;await setPhoto(e,f[0],1400);ed();upd();zoomOpen(e,3/4,1400)})}
+function addTh(){S.thanks.push({title:'',text:'',photo:''});ed();upd()}
+function delTh(i){S.thanks.splice(i,1);ed();upd()}
+function thp(i){const e=S.thanks[i];if(e.photo)return zoomOpen(e,3/4,1400);pick(async f=>{if(!f[0])return;await setPhoto(e,f[0],1400);ed();upd();zoomOpen(e,3/4,1400)})}
 function add(k){S[k].push({name:'',label:'',path:'',photo:''});ed();upd()}
 function del(k,i){S[k].splice(i,1);ed();upd()}
 
@@ -194,7 +198,7 @@ function pv(){
  const groupHTML=S.group.photo?`<div class="zf" style="width:100%;aspect-ratio:16/9;margin:12px auto 0;border-radius:40px;background:#eee">${zimg(S.group,16/9)}</div>`:'';
  const textSec=(t,h,x)=>(h||x)?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left;color:var(--mag)">${t}</h4><div style="text-align:left;margin:0 0 8px;padding-left:10px;border-left:4px solid var(--mag)">${h?`<b style="font-size:18px;display:block;margin-bottom:4px">${esc(h)}</b>`:''}${x?`<p style="margin:0">${esc(x)}</p>`:''}</div>`:'';
  const themeHTML=textSec('Theme',m.themeTitle,m.theme),wodHTML=textSec('Word of the Day',m.wodWord,m.wod);
- const thanksHTML=(S.thanks.text||S.thanks.photo)?`<div style="break-inside:avoid"><h4 style="font-size:24px;margin:24px 0 6px;text-align:left">Special Thanks</h4><div style="display:flex;gap:20px;align-items:flex-start"><div style="flex:1;text-align:left">${S.thanks.text?`<p style="margin:0 0 8px">${esc(S.thanks.text)}</p>`:''}</div>${S.thanks.photo?`<div class="zf" style="flex:0 0 36%;aspect-ratio:3/4;margin-right:20px;border-radius:30px;background:#eee">${zimg(S.thanks,3/4)}</div>`:''}</div></div>`:'';
+ const thanksHTML=S.thanks.filter(t=>t.title||t.text||t.photo).map(t=>`<div style="break-inside:avoid">${t.title?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left">${esc(t.title)}</h4>`:''}<div style="display:flex;gap:20px;align-items:flex-start"><div style="flex:1;text-align:left">${t.text?`<p style="margin:0 0 8px">${esc(t.text)}</p>`:''}</div>${t.photo?`<div class="zf" style="flex:0 0 36%;aspect-ratio:3/4;margin-right:20px;border-radius:30px;background:#eee">${zimg(t,3/4)}</div>`:''}</div></div>`).join('');
  const endHTML=((m.outro||S.team.photo)?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left">Concluding Note</h4>${m.outro?`<p style="text-align:left;margin:0 0 8px">${esc(m.outro)}</p>`:''}${S.team.photo?`<div class="zf" style="width:80%;aspect-ratio:1/1;margin:12px auto 0;border-radius:6px">${zimg(S.team,1)}</div>`:''}`:'')+(m.report?`<h4 style="font-size:inherit;margin:6em 0 6px;text-align:left">Report Submitted By</h4><p style="text-align:left;margin:0 0 8px;white-space:pre-line">${esc(m.report)}</p>`:'');
  let n=1,o=`<div class="page cover" style="--mag:${m.color}"><div class="bt"><b>${esc(m.title)}</b>${m.issue?`<span>${esc(m.issue)}</span>`:''}${d?`<span>${esc(d)}</span>`:''}</div><div class="club">${esc(m.club)}</div><p style="text-align:left;margin-top:40px">${esc(m.intro)}</p>${groupHTML}${themeHTML}${wodHTML}${rolesHTML}${speechHTML}${challengeHTML}${topicsHTML}${winnersHTML}${thanksHTML}${endHTML}${foot(n++)}</div>`;
  $('#pages').innerHTML=o;
