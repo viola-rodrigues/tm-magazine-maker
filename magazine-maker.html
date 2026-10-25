@@ -213,9 +213,17 @@ function pv(){
   if(kids.length<5)break;
   const nx=document.createElement('div');nx.className='page';nx.style.cssText=pg.style.cssText;nx.appendChild(ft.cloneNode(true));
   pg.after(nx);
+  let sp=null;
   while(pg.offsetHeight>lim+1){
    const ks=[...pg.children].filter(c=>c!==ft);if(ks.length<5)break;
-   let el=ks[ks.length-1];nx.insertBefore(el,nx.firstChild);
+   let el=ks[ks.length-1];
+   // split tables/grids row by row so a section continues on the next page instead of jumping whole
+   const isT=el.tagName=='TABLE',box=isT?el.tBodies[0]:el,it=box&&(isT||el.classList.contains('grid'))?[...box.children]:[];
+   if(it.length>1||(sp&&sp.src==el&&it.length==1)){
+    if(!sp||sp.src!=el){const c=el.cloneNode(true),cb=isT?c.tBodies[0]:c;[...cb.children].forEach(x=>x.remove());nx.insertBefore(c,nx.firstChild);sp={src:el,box:cb}}
+    sp.box.insertBefore(it[it.length-1],sp.box.firstChild);
+    if(it.length==1){el.remove();sp=null}else continue;
+   }else nx.insertBefore(el,nx.firstChild);
    const prev=[...pg.children].filter(c=>c!==ft).pop();if(prev&&prev.tagName=='H4'){nx.insertBefore(prev,nx.firstChild)}
   }
   pg=nx;
