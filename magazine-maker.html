@@ -105,8 +105,8 @@ function ed(){
  <label class="f">Opening note (beginning)</label><textarea oninput="S.meta.intro=this.value;upd()">${esc(m.intro)}</textarea>
  <label class="f">Group photo (optional)</label><div class="row"><div class="th" onclick="gp()">${S.group.photo?`<img src="${S.group.photo}" style="width:100%;height:100%;object-fit:cover">`:'📷'}</div>
  <div style="grid-column:span 2;color:var(--mu);font-size:12px">Shown centred below the opening note.</div>${S.group.photo?`<button class="x" onclick="S.group.photo='';ed();upd()">×</button>`:''}</div>
- <h2>Theme</h2><input placeholder="Theme" value="${esc(m.themeTitle)}" oninput="S.meta.themeTitle=this.value;upd()"><textarea placeholder="Theme of the meeting…" oninput="S.meta.theme=this.value;upd()">${esc(m.theme)}</textarea>
- <h2>Word of the Day</h2><input placeholder="Word" value="${esc(m.wodWord)}" oninput="S.meta.wodWord=this.value;upd()"><textarea placeholder="Word of the day, its meaning and an example…" oninput="S.meta.wod=this.value;upd()">${esc(m.wod)}</textarea>`;
+ <h2>Theme</h2><input placeholder="Theme" value="${esc(m.themeTitle)}" oninput="S.meta.themeTitle=this.value;upd()"><textarea placeholder="Theme of the meeting…" oninput="S.meta.theme=this.value;upd()">${esc(m.theme)}</textarea>${spBtn('theme')}
+ <h2>Word of the Day</h2><input placeholder="Word" value="${esc(m.wodWord)}" oninput="S.meta.wodWord=this.value;upd()"><textarea placeholder="Word of the day, its meaning and an example…" oninput="S.meta.wod=this.value;upd()">${esc(m.wod)}</textarea>${spBtn('wod')}`;
  SECS.forEach(s=>{const isR=s.k=='roles';h+=`<h2>${s.t}<span><button onclick="add('${s.k}')">＋</button></span></h2>`;
   if(s.k=='speeches')h+=`<label class="f">Details for Prepared Speeches and Evaluators</label><textarea placeholder="Any details shown under the section heading…" oninput="S.meta.speechNote=this.value;upd()">${esc(m.speechNote)}</textarea>`;
   if(s.k=='challenge')h+=`<label class="f">Description for Team Challenge</label><textarea placeholder="Any details shown under the section heading…" oninput="S.meta.challengeNote=this.value;upd()">${esc(m.challengeNote)}</textarea>`;
@@ -116,11 +116,12 @@ function ed(){
   <div>${s.k=='challenge'?`<input placeholder="Team title" value="${esc(e.name)}" oninput="S.challenge[${i}].name=this.value;upd()"><textarea placeholder="Team description…" oninput="S.challenge[${i}].label=this.value;upd()">${esc(e.label)}</textarea>`:`<input placeholder="Toastmaster's name" value="${esc(e.name)}" oninput="S.${s.k}[${i}].name=this.value;upd()">`}${s.k=='evals'||s.k=='challenge'?'':`<input placeholder="${s.l}" value="${esc(e.label)}" oninput="S.${s.k}[${i}].label=this.value;upd()">`}${s.k=='speeches'?`<input placeholder="Project / Pathway details" value="${esc(e.path)}" oninput="S.speeches[${i}].path=this.value;upd()">`:''}</div>
   <button class="x" onclick="del('${s.k}',${i})">×</button></div>`});
   const addLbl={roles:'role taker',speeches:'speaker',evals:'evaluator',challenge:'team',topics:'table topics speaker'}[s.k];
-  if(addLbl)h+=`<button onclick="add('${s.k}')" style="width:100%;margin-top:6px" title="Add another ${addLbl}">＋ Add ${addLbl}</button>`});
+  if(addLbl)h+=`<button onclick="add('${s.k}')" style="width:100%;margin-top:6px" title="Add another ${addLbl}">＋ Add ${addLbl}</button>`;
+  if(s.k!='speeches')h+=spBtn(s.k=='evals'?'speeches':s.k)});
  S.thanks.forEach((t,i)=>{h+=`<h2>Custom section ${i+1}<span><button onclick="delTh(${i})" title="Remove this section">×</button></span></h2><label class="f">Section heading</label><input placeholder="e.g. Special Thanks" value="${esc(t.title)}" oninput="S.thanks[${i}].title=this.value;upd()">
  <label class="f">Description</label><textarea placeholder="Write about this section…" oninput="S.thanks[${i}].text=this.value;upd()">${esc(t.text)}</textarea>
  <label class="f">Photo (optional)</label><div class="row"><div class="th" onclick="thp(${i})">${t.photo?`<img src="${t.photo}" style="width:100%;height:100%;object-fit:cover">`:'📷'}</div>
- <div style="grid-column:span 2;color:var(--mu);font-size:12px">Shown beside the description.</div>${t.photo?`<button class="x" onclick="S.thanks[${i}].photo='';ed();upd()">×</button>`:''}</div>`});
+ <div style="grid-column:span 2;color:var(--mu);font-size:12px">Shown beside the description.</div>${t.photo?`<button class="x" onclick="S.thanks[${i}].photo='';ed();upd()">×</button>`:''}</div>${spBtn('th'+i)}`});
  h+=`<button onclick="addTh()" style="width:100%;margin-top:6px">＋ Add section (heading, photo, description)</button>
  <h2>Concluding Note</h2><textarea oninput="S.meta.outro=this.value;upd()">${esc(m.outro)}</textarea>
  <label class="f">Photo (optional)</label><div class="row"><div class="th" onclick="tp()">${S.team.photo?`<img src="${S.team.photo}" style="width:100%;height:100%;object-fit:cover">`:'📷'}</div>
@@ -175,7 +176,9 @@ function ph(k,i){const e=S[k][i];if(e.photo)return zoomOpen(e,1,720);pick(async 
 function tp(){const e=S.team;if(e.photo)return zoomOpen(e,16/9,1400);pick(async f=>{if(!f[0])return;await setPhoto(e,f[0],1400);ed();upd();zoomOpen(e,16/9,1400)})}
 function gp(){const e=S.group;if(e.photo)return zoomOpen(e,16/9,1400);pick(async f=>{if(!f[0])return;await setPhoto(e,f[0],1400);ed();upd();zoomOpen(e,16/9,1400)})}
 function addTh(){S.thanks.push({title:'',text:'',photo:''});ed();upd()}
-function delTh(i){S.thanks.splice(i,1);ed();upd()}
+function delTh(i){S.thanks.splice(i,1);const g=S.meta.gaps;if(g){const n=S.thanks.length+1;for(let j=i;j<n;j++){const v=g['th'+(j+1)];if(v)g['th'+j]=v;else delete g['th'+j]}}ed();upd()}
+function gap(k,d){const m=S.meta;m.gaps=m.gaps||{};m.gaps[k]=Math.max(0,(m.gaps[k]||0)+d);ed();upd()}
+const spBtn=k=>{const n=(S.meta.gaps||{})[k]||0;return `<div style="display:flex;gap:6px;align-items:center;margin-top:6px"><button onclick="gap('${k}',1)" title="Add more space after this section">↕ Add space</button>${n?`<button onclick="gap('${k}',-1)" title="Remove some space">− Less</button><span style="color:var(--mu);font-size:12px">${n*20}px</span>`:''}</div>`}
 function thp(i){const e=S.thanks[i];if(e.photo)return zoomOpen(e,3/4,1400);pick(async f=>{if(!f[0])return;await setPhoto(e,f[0],1400);ed();upd();zoomOpen(e,3/4,1400)})}
 function add(k){S[k].push({name:'',label:'',path:'',photo:''});ed();upd()}
 function del(k,i){S[k].splice(i,1);ed();upd()}
@@ -202,9 +205,10 @@ function pv(){
  const groupHTML=S.group.photo?`<div class="zf" style="width:100%;aspect-ratio:16/9;margin:12px auto 0;border-radius:40px;background:#eee">${zimg(S.group,16/9)}</div>`:'';
  const textSec=(t,h,x)=>(h||x)?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left;color:var(--mag)">${t}</h4><div style="text-align:left;margin:0 0 8px;padding-left:10px;border-left:4px solid var(--mag)">${h?`<b style="font-size:18px;display:block;margin-bottom:4px">${esc(h)}</b>`:''}${x?`<p style="margin:0">${esc(x)}</p>`:''}</div>`:'';
  const themeHTML=textSec('Theme',m.themeTitle,m.theme),wodHTML=textSec('Word of the Day',m.wodWord,m.wod);
- const thanksHTML=S.thanks.filter(t=>t.title||t.text||t.photo).map(t=>`<div style="break-inside:avoid">${t.title?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left">${esc(t.title)}</h4>`:''}<div style="display:flex;gap:20px;align-items:flex-start"><div style="flex:1;text-align:left">${t.text?`<p style="margin:0 0 8px">${esc(t.text)}</p>`:''}</div>${t.photo?`<div class="zf" style="flex:0 0 36%;aspect-ratio:3/4;margin-right:20px;border-radius:30px;background:#eee">${zimg(t,3/4)}</div>`:''}</div></div>`).join('');
+ const gp=k=>m.gaps&&m.gaps[k]>0?`<div class="sp" style="height:${m.gaps[k]*20}px;flex:none"></div>`:'',W=(k,h)=>h?h+gp(k):'';
+ const thanksHTML=S.thanks.map((t,i)=>({t,i})).filter(({t})=>t.title||t.text||t.photo).map(({t,i})=>`<div style="break-inside:avoid">${t.title?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left">${esc(t.title)}</h4>`:''}<div style="display:flex;gap:20px;align-items:flex-start"><div style="flex:1;text-align:left">${t.text?`<p style="margin:0 0 8px">${esc(t.text)}</p>`:''}</div>${t.photo?`<div class="zf" style="flex:0 0 36%;aspect-ratio:3/4;margin-right:20px;border-radius:30px;background:#eee">${zimg(t,3/4)}</div>`:''}</div></div>${gp('th'+i)}`).join('');
  const endHTML=((m.outro||S.team.photo)?`<h4 style="font-size:24px;margin:24px 0 6px;text-align:left">Concluding Note</h4>${m.outro?`<p style="text-align:left;margin:0 0 8px">${esc(m.outro)}</p>`:''}${S.team.photo?`<div class="zf" style="width:80%;aspect-ratio:1/1;margin:12px auto 0;border-radius:6px">${zimg(S.team,1)}</div>`:''}`:'')+(m.report?`<h4 style="font-size:inherit;margin:6em 0 6px;text-align:left">Report Submitted By</h4><p style="text-align:left;margin:0 0 8px;white-space:pre-line">${esc(m.report)}</p>`:'');
- let n=1,o=`<div class="page cover" style="--mag:${m.color}"><div class="bt"><b>${esc(m.title)}</b>${m.issue?`<span>${esc(m.issue)}</span>`:''}${d?`<span>${esc(d)}</span>`:''}</div><div class="club">${esc(m.club)}</div><p style="text-align:left;margin-top:40px">${esc(m.intro)}</p>${groupHTML}${themeHTML}${wodHTML}${rolesHTML}${speechHTML}${challengeHTML}${topicsHTML}${winnersHTML}${thanksHTML}${endHTML}${foot(n++)}</div>`;
+ let n=1,o=`<div class="page cover" style="--mag:${m.color}"><div class="bt"><b>${esc(m.title)}</b>${m.issue?`<span>${esc(m.issue)}</span>`:''}${d?`<span>${esc(d)}</span>`:''}</div><div class="club">${esc(m.club)}</div><p style="text-align:left;margin-top:40px">${esc(m.intro)}</p>${groupHTML}${W('theme',themeHTML)}${W('wod',wodHTML)}${W('roles',rolesHTML)}${W('speeches',speechHTML)}${W('challenge',challengeHTML)}${W('topics',topicsHTML)}${W('winners',winnersHTML)}${thanksHTML}${endHTML}${foot(n++)}</div>`;
  $('#pages').innerHTML=o;
  // flow an overflowing cover onto continuation pages
  const lim=297*96/25.4;let pg=$('#pages .cover');
@@ -227,7 +231,9 @@ function pv(){
    const prev=[...pg.children].filter(c=>c!==ft).pop();if(prev&&prev.tagName=='H4'){nx.insertBefore(prev,nx.firstChild)}
   }
   pg=nx;
- }}
+ }
+ // a spacer that lands at the top of a continuation page would only waste room
+ document.querySelectorAll('#pages .page:not(.cover)>.sp:first-child').forEach(x=>x.remove())}
 ed();pv();
 </script>
 </body></html>
